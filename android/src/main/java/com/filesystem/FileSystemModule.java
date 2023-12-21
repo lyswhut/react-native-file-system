@@ -111,6 +111,11 @@ public class FileSystemModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void stat(String path, Promise promise) {
+    AsyncTask.runTask(new Callables.Stat(reactContext, path), promise);
+  }
+
+  @ReactMethod
   public void exists(String path, Promise promise) {
     AsyncTask.runTask(new Callables.Exists(reactContext, path), promise);
   }

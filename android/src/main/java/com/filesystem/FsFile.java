@@ -51,67 +51,67 @@ public class FsFile {
   }
 
   public boolean isDirectory() {
-    return this.file != null
-      ? this.file.isDirectory()
-      : this.dFile.isDirectory();
+    return isDocFile()
+      ? this.dFile.isDirectory()
+      : this.file.isDirectory();
   }
 
   public FsFile getParentFile() {
-    return this.file != null
-      ? new FsFile(context, this.file.getParentFile())
-      : new FsFile(context, this.dFile.getParentFile());
+    return isDocFile()
+      ? new FsFile(context, this.dFile.getParentFile())
+      : new FsFile(context, this.file.getParentFile());
   }
 
   public boolean exists() {
-    return this.file != null
-      ? this.file.exists()
-      : this.dFile.exists();
+    return isDocFile()
+      ? this.dFile.exists()
+      : this.file.exists();
   }
 
   public ArrayList<FsFile> ls() throws IOException {
     ArrayList<FsFile> list = new ArrayList<>();
-    if (this.file != null) {
-      if (!this.file.canRead()) throw new IOException("permission denied");
-      File[] files = this.file.listFiles();
-      if (files != null) for (File f: files) list.add(new FsFile(this.context, f));
-    } else {
+    if (isDocFile()) {
       if (!this.dFile.canRead()) throw new IOException("permission denied");
       DocumentFile[] files = this.dFile.listFiles();
       for (DocumentFile f: files) list.add(new FsFile(this.context, f));
+    } else {
+      if (!this.file.canRead()) throw new IOException("permission denied");
+      File[] files = this.file.listFiles();
+      if (files != null) for (File f: files) list.add(new FsFile(this.context, f));
     }
 
     return list;
   }
 
   public void mkdir() {
-    if (this.file != null) {
-      this.file.mkdirs();
-    } else {
+    if (isDocFile()) {
       String name = this.dFile.getName();
       this.dFile.getParentFile().createDirectory(name);
+    } else {
+      this.file.mkdirs();
     }
   }
 
   public FsFile mkdir(String name) {
-    if (this.file != null) {
+    if (isDocFile()) {
+      return new FsFile(this.context, this.dFile.createDirectory(name));
+    } else {
       File f = new File(this.file.getAbsolutePath() + "/" + name);
       f.mkdirs();
       return new FsFile(this.context, f);
-    } else {
-      return new FsFile(this.context, this.dFile.createDirectory(name));
     }
   }
 
   public boolean unlink() {
-    return this.file != null
-      ? this.file.delete()
-      : this.dFile.delete();
+    return isDocFile()
+      ? this.dFile.delete()
+      : this.file.delete();
   }
 
   public boolean rename(String name) {
-    return this.file != null
-      ? this.file.renameTo(new File(this.file.getParent() + "/" + name))
-      : this.dFile.renameTo(name);
+    return isDocFile()
+      ? this.dFile.renameTo(name)
+      : this.file.renameTo(new File(this.file.getParent() + "/" + name));
   }
 
   public void mv(String toPath) throws IOException {
@@ -158,7 +158,7 @@ public class FsFile {
   }
 
   public WritableMap buildFileInfo() {
-    return this.file == null
+    return isDocFile()
       ? Utils.buildDocumentFile(this.dFile)
       : Utils.buildFile(this.file);
   }
