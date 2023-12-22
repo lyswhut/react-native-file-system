@@ -22,8 +22,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+
+import kotlin.text.Charsets;
 
 public class Utils {
   public static boolean isContentUri(String path) {
@@ -182,11 +185,12 @@ public class Utils {
     Uri uri = null;
     if (Utils.isContentUri(path)) {
       int index = path.lastIndexOf("/");
-      String distName = path.substring(0, index);
-      String distPath = path.substring(index + 1);
+      String distPath = path.substring(0, index);
+      String distName = path.substring(index + 1);
       DocumentFile destinationDirectory = DocumentFile.fromTreeUri(context, Uri.parse(distPath));
       if (!destinationDirectory.exists()) throw new IOException("dest dir not exists.");
-      uri = DocumentsContract.createDocument(context.getContentResolver(), destinationDirectory.getUri(), getMimeTypeFromFileName(distName), getName(distName));
+      uri = DocumentsContract.createDocument(context.getContentResolver(),
+              destinationDirectory.getUri(), getMimeTypeFromFileName(distName), getName(distName));
     }
     return uri;
   }
