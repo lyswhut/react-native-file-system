@@ -89,8 +89,8 @@ export const AndroidScoped = {
   async getPersistedUriPermissions(): Promise<string[]> {
     return FileSystemModule.getPersistedUriPermissions()
   },
-  releasePersistableUriPermission() {
-    return FileSystemModule.releasePersistableUriPermission()
+  releasePersistableUriPermission(path: string) {
+    return FileSystemModule.releasePersistableUriPermission(path)
   },
   async openDocumentTree(isPersist: boolean): Promise<FileType> {
     return FileSystemModule.openDocumentTree(isPersist)
