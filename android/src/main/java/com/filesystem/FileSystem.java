@@ -13,7 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -158,6 +161,35 @@ public class FileSystem {
       return encoding.equals("base64")
         ? Utils.encodeBase64(byteArrayOutputStream.toByteArray())
         : new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
+    }
+  }
+
+  public static String hash(ReactApplicationContext reactContext, String filepath, String algorithm) throws Exception {
+    // https://github.com/itinance/react-native-fs/blob/64aa755cc1d37f59fa205bf2d52dd71a7d691504/android/src/main/java/com/rnfs/RNFSManager.java#L318
+    Map<String, String> algorithms = new HashMap<>();
+    algorithms.put("md5", "MD5");
+    algorithms.put("sha1", "SHA-1");
+    algorithms.put("sha224", "SHA-224");
+    algorithms.put("sha256", "SHA-256");
+    algorithms.put("sha384", "SHA-384");
+    algorithms.put("sha512", "SHA-512");
+    if (!algorithms.containsKey(algorithm)) throw new Exception("Invalid hash algorithm");
+
+    MessageDigest md = MessageDigest.getInstance(algorithms.get(algorithm));
+
+    try (InputStream inputStream = Utils.createInputStream(reactContext, filepath)) {
+      byte[] buffer = new byte[1024 * 10]; // 10 KB Buffer
+
+      int read;
+      while ((read = inputStream.read(buffer)) != -1) {
+        md.update(buffer, 0, read);
+      }
+
+      StringBuilder hexString = new StringBuilder();
+      for (byte digestByte : md.digest())
+        hexString.append(String.format("%02x", digestByte));
+
+      return hexString.toString();
     }
   }
 }

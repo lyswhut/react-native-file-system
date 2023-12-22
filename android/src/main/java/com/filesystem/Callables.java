@@ -215,5 +215,19 @@ public class Callables {
       return FileSystem.unGzipString(this.data, this.encoding);
     }
   }
+  static class Hash implements Callable<Object> {
+    private final ReactApplicationContext context;
+    private final String filePath;
+    private final String algorithm;
+    public Hash(ReactApplicationContext context, String filePath, String algorithm) {
+      this.context = context;
+      this.filePath = filePath;
+      this.algorithm = algorithm;
+    }
+    @Override
+    public Object call() throws Exception {
+      return FileSystem.hash(this.context, this.filePath, this.algorithm);
+    }
+  }
 
 }

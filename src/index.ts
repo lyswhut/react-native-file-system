@@ -37,6 +37,7 @@ export interface FileType {
   size: number
 }
 export type Encoding = 'base64' | 'utf8'
+export type HashAlgorithm = 'md5' | 'sha1' | 'sha224' | 'sha256' | 'sha384' | 'sha512'
 
 export const Dirs: {
   /**
@@ -208,5 +209,13 @@ export const FileSystem = {
    */
   async unGzipString(data: string, encoding: Encoding = 'utf8'): Promise<string> {
     return FileSystemModule.unGzipString(data, encoding)
+  },
+  /**
+   * Get File hash string.
+   *
+   * Default algorithm is md5.
+   */
+  async hash(path: string, algorithm: HashAlgorithm = 'md5'): Promise<string> {
+    return FileSystemModule.hash(path, algorithm)
   },
 }

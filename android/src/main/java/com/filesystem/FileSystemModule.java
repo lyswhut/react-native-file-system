@@ -161,6 +161,11 @@ public class FileSystemModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void hash(String path, String algorithm, Promise promise) {
+    AsyncTask.runTask(new Callables.Hash(reactContext, path, algorithm), promise);
+  }
+
+  @ReactMethod
   public void getExternalStoragePaths(boolean is_removable, Promise promise) {
     WritableArray arr = Arguments.createArray();
     ArrayList<String> paths = Utils.getExternalStoragePaths(reactContext, is_removable);
