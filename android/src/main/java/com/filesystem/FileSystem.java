@@ -144,6 +144,7 @@ public class FileSystem {
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
          GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
       gzipOutputStream.write(data);
+      gzipOutputStream.close();
       return Utils.encodeBase64(outputStream.toByteArray());
     }
   }
@@ -158,6 +159,7 @@ public class FileSystem {
       while ((bytesRead = gzipInputStream.read(buffer)) != -1) {
         byteArrayOutputStream.write(buffer, 0, bytesRead);
       }
+      gzipInputStream.close();
       return encoding.equals("base64")
         ? Utils.encodeBase64(byteArrayOutputStream.toByteArray())
         : new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
