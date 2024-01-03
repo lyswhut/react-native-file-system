@@ -210,19 +210,19 @@ public class FileSystemModule extends ReactContextBaseJavaModule {
       Intent intent = new Intent();
       intent.setAction(Intent.ACTION_OPEN_DOCUMENT_TREE);
 
-      if (activityEventListener != null) {
-        reactContext.removeActivityEventListener(activityEventListener);
-        activityEventListener = null;
-      }
+      if (activityEventListener != null) reactContext.removeActivityEventListener(activityEventListener);
       activityEventListener = new ActivityEventListener() {
         @SuppressLint("WrongConstant")
         @Override
         public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-          if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            if (data == null) promise.resolve(null);
+          if (requestCode != REQUEST_CODE) promise.reject("-1", "open document failed, code: " + requestCode);
+          else if (resultCode == Activity.RESULT_CANCELED) promise.resolve(null);
+          else if (resultCode != Activity.RESULT_OK) promise.reject("-1", "open document result failed: " + resultCode);
+          else {
+            if (data == null) promise.reject("-1", "data is null.");
             else {
               Uri uri = data.getData();
-              if (uri == null) promise.resolve(null);
+              if (uri == null) promise.reject("-1", "uri is null.");
               else {
                 if (persist) {
                   final int takeFlags = data.getFlags()
@@ -232,7 +232,7 @@ public class FileSystemModule extends ReactContextBaseJavaModule {
                   reactContext.getContentResolver().takePersistableUriPermission(uri, takeFlags);
                 }
                 DocumentFile dir = DocumentFile.fromTreeUri(reactContext, uri);
-                if (dir == null) promise.resolve(null);
+                if (dir == null) promise.reject("-1", "dir uri is null.");
                 else promise.resolve(Utils.buildDocumentFile(dir));
               }
             }
@@ -296,29 +296,30 @@ public class FileSystemModule extends ReactContextBaseJavaModule {
       if (isMultiSelect) intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 
 
-      if (activityEventListener != null) {
-        reactContext.removeActivityEventListener(activityEventListener);
-        activityEventListener = null;
-      }
+      if (activityEventListener != null) reactContext.removeActivityEventListener(activityEventListener);
       activityEventListener = new ActivityEventListener() {
         @Override
         public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-          if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            if (data == null) promise.resolve(null);
+          // Log.d("FileSystem", "openDocument requestCode: " + requestCode + " resultCode: " + resultCode);
+          if (requestCode != REQUEST_CODE) promise.reject("-1", "open document failed, code: " + requestCode);
+          else if (resultCode == Activity.RESULT_CANCELED) promise.resolve(null);
+          else if (resultCode != Activity.RESULT_OK) promise.reject("-1", "open document result failed: " + resultCode);
+          else {
+            if (data == null) promise.reject("-1", "data is null.");
             else {
               Uri uri = data.getData();
-              if (uri == null) promise.resolve(null);
+              if (uri == null) promise.reject("-1", "uri is null.");
               else {
-                DocumentFile dir = DocumentFile.fromSingleUri(reactContext, uri);
-                if (dir == null) promise.resolve(null);
+                DocumentFile fileUri = DocumentFile.fromSingleUri(reactContext, uri);
+                if (fileUri == null) promise.reject("-1", "file uri is null.");
                 else {
-                  WritableMap params = Utils.buildDocumentFile(dir);
+                  WritableMap params = Utils.buildDocumentFile(fileUri);
                   Callable<Object> callable;
-                  if (toPath == null) callable = new Callables.ReadFile(reactContext, dir.getUri().toString(), encoding);
+                  if (toPath == null) callable = new Callables.ReadFile(reactContext, fileUri.getUri().toString(), encoding);
                   else {
-                    String path = toPath + "/" + dir.getName();
+                    String path = toPath + "/" + fileUri.getName();
                     Log.d("FileSystem", "openDocument toPath: " + path);
-                    callable = new Callables.Cp(reactContext, dir.getUri().toString(), path);
+                    callable = new Callables.Cp(reactContext, fileUri.getUri().toString(), path);
                     params.putString("data", path);
                   }
                   AsyncTask.TaskRunner taskRunner = new AsyncTask.TaskRunner();
@@ -338,8 +339,6 @@ public class FileSystemModule extends ReactContextBaseJavaModule {
                 }
               }
             }
-          } else {
-            promise.resolve(null);
           }
           reactContext.removeActivityEventListener(activityEventListener);
           activityEventListener = null;
