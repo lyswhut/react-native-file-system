@@ -156,18 +156,18 @@ public class Utils {
   public static String getMimeTypeFromFileName(String name) {
     return getMimeTypeFromExt(getFileExtension(name));
   }
-  public static String getExtFromMimeType(String mimeType) {
-    MimeTypeMap mime = MimeTypeMap.getSingleton();
-    return mime.getExtensionFromMimeType(getFileExtension(mimeType));
-  }
-  public static String getName(String fileName) {
-    int dotIndex = fileName.lastIndexOf(".");
-    if (dotIndex != -1) {
-      return fileName.substring(0, dotIndex);
-    } else {
-      return fileName;
-    }
-  }
+//  public static String getExtFromMimeType(String mimeType) {
+//    MimeTypeMap mime = MimeTypeMap.getSingleton();
+//    return mime.getExtensionFromMimeType(getFileExtension(mimeType));
+//  }
+//  public static String getName(String fileName) {
+//    int dotIndex = fileName.lastIndexOf(".");
+//    if (dotIndex != -1) {
+//      return fileName.substring(0, dotIndex);
+//    } else {
+//      return fileName;
+//    }
+//  }
   public static String getFileExtension(String fileName) {
     int dotIndex = fileName.lastIndexOf(".");
     if (dotIndex != -1 && dotIndex < fileName.length() - 1) {
@@ -190,7 +190,7 @@ public class Utils {
       DocumentFile destinationDirectory = DocumentFile.fromTreeUri(context, Uri.parse(distPath));
       if (!destinationDirectory.exists()) throw new IOException("dest dir not exists.");
       uri = DocumentsContract.createDocument(context.getContentResolver(),
-              destinationDirectory.getUri(), getMimeTypeFromFileName(distName), getName(distName));
+              destinationDirectory.getUri(), "application/octet-stream", distName);
     }
     return uri;
   }
